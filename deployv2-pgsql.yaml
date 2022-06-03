@@ -344,7 +344,7 @@ services:
    com.zabbix.os: "oracle linux"
 
  postgres-server:
-  image: postgres:13-alpine
+  image: postgres:1lastest
 #  command: -c ssl=on -c ssl_cert_file=/run/secrets/server-cert.pem -c ssl_key_file=/run/secrets/server-key.pem -c ssl_ca_file=/run/secrets/root-ca.pem
   volumes:
    - ./zbx_env/var/lib/postgresql/data:/var/lib/postgresql/data:rw
@@ -369,18 +369,18 @@ services:
   volumes:
    - ./zbx_env/var/lib/postgresql/data:/var/lib/postgresql/data:rw
 
-# elasticsearch:
-#  image: elasticsearch
-#  profiles:
-#   - full
-#   - all
-#  environment:
-#   - transport.host=0.0.0.0
-#   - discovery.zen.minimum_master_nodes=1
-#  networks:
-#   zbx_net_backend:
-#    aliases:
-#     - elasticsearch
+ grafana:
+  image: grafana/grafana:latest
+  profiles:
+   - full
+   - all
+  environment:
+   - transport.host=0.0.0.0
+   - discovery.zen.minimum_master_nodes=1
+  networks:
+  zbx_net_backend:
+   aliases:
+    - elasticsearch
 
 networks:
   zbx_net_frontend:
