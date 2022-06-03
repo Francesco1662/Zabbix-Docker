@@ -1,0 +1,42 @@
+apiVersion: v1
+location: eastus
+name: myContainerGroup
+properties:
+  containers:
+  - name: Zabbix-Server
+    properties:
+      image: zabbix/zabbix-server-pgsql:latest
+      resources:
+        requests:
+          cpu: 1
+          memoryInGb: 2
+      ports:
+      - port: 80
+      - port: 8080
+  - name: Zabbix-Database
+    properties:
+      image: postgres:latest
+      resources:
+        requests:
+          cpu: 1
+          memoryInGb: 2.5
+      ports:
+      - port: 80
+      - port: 8080
+  - name: Zabbix-web-nginx
+    properties:
+      image: zabbix/zabbix-web-nginx-pgsql:lastest
+      resources:
+        requests:
+          cpu: 1
+          memoryInGb: 1.5
+  osType: Linux
+  ipAddress:
+    type: Public
+    ports:
+    - protocol: tcp
+      port: 443
+    - protocol: tcp
+      port: 8443
+tags: zabbix
+type: Microsoft.ContainerInstance/containerGroups
