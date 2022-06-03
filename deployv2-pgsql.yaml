@@ -216,7 +216,7 @@ services:
    com.zabbix.os: "oracle linux"
 
  zabbix-agent:
-  image: zabbix/zabbix-agent:ol-6.0-latest
+  image: zabbix/zabbix-agent:latest
   profiles:
    - full
    - all
@@ -246,8 +246,6 @@ services:
    zbx_net_backend:
     aliases:
      - zabbix-agent
-     - zabbix-agent-passive
-     - zabbix-agent-ol
   stop_grace_period: 5s
   labels:
    com.zabbix.description: "Zabbix agent"
