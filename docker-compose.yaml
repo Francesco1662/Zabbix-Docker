@@ -1,57 +1,7 @@
 version: '3.5'
 services:
- zabbix-build-base:
-  build:
-   context: ./Dockerfiles/build-base/ubuntu
-   cache_from:
-    - ubuntu:jammy
-  image: zabbix-build-base:ubuntu-local
-
- zabbix-build-pgsql:
-  build:
-   context: ./Dockerfiles/build-pgsql/ubuntu
-   cache_from:
-    - ubuntu:jammy
-   args:
-    BUILD_BASE_IMAGE: zabbix-build-base:ubuntu-local
-  image: zabbix-build-pgsql:ubuntu-local
-  depends_on:
-   - zabbix-build-base
-
- zabbix-build-mysql:
-  build:
-   context: ./Dockerfiles/build-mysql/ubuntu
-   cache_from:
-    - ubuntu:jammy
-   args:
-    BUILD_BASE_IMAGE: zabbix-build-base:ubuntu-local
-  image: zabbix-build-mysql:ubuntu-local
-  profiles:
-   - all
-  depends_on:
-   - zabbix-build-base
-
- zabbix-build-sqlite3:
-  build:
-   context: ./Dockerfiles/build-sqlite3/ubuntu
-   cache_from:
-    - ubuntu:jammy
-   args:
-    BUILD_BASE_IMAGE: zabbix-build-base:ubuntu-local
-  image: zabbix-build-sqlite3:ubuntu-local
-  profiles:
-   - all
-  depends_on:
-   - zabbix-build-base
-
  zabbix-server:
-  build:
-   context: ./Dockerfiles/server-pgsql/ubuntu
-   cache_from:
-    - ubuntu:jammy
-   args:
-    BUILD_BASE_IMAGE: zabbix-build-pgsql:ubuntu-local
-  image: zabbix-server-pgsql:ubuntu-local
+  image: zabbix/zabbix-server-pgsql:ubuntu-6.0-latest
   ports:
    - "10051:10051"
   volumes:
@@ -88,7 +38,6 @@ services:
    - POSTGRES_PASSWORD
   depends_on:
    - postgres-server
-   - zabbix-build-pgsql
   networks:
    zbx_net_backend:
      aliases:
@@ -113,13 +62,7 @@ services:
    com.zabbix.os: "ubuntu"
 
  zabbix-proxy-sqlite3:
-  build:
-   context: ./Dockerfiles/proxy-sqlite3/ubuntu
-   cache_from:
-    - ubuntu:jammy
-   args:
-    BUILD_BASE_IMAGE: zabbix-build-sqlite3:ubuntu-local
-  image: zabbix-proxy-sqlite3:ubuntu-local
+  image: zabbix/zabbix-proxy-sqlite3:ubuntu-6.0-latest
   profiles:
    - all
   ports:
@@ -151,7 +94,6 @@ services:
   depends_on:
    - zabbix-java-gateway
    - zabbix-snmptraps
-   - zabbix-build-sqlite3
   networks:
    zbx_net_backend:
     aliases:
@@ -168,13 +110,7 @@ services:
    com.zabbix.os: "ubuntu"
 
  zabbix-proxy-mysql:
-  build:
-   context: ./Dockerfiles/proxy-mysql/ubuntu
-   cache_from:
-    - ubuntu:jammy
-   args:
-    BUILD_BASE_IMAGE: zabbix-build-mysql:ubuntu-local
-  image: zabbix-proxy-mysql:ubuntu-local
+  image: zabbix/zabbix-proxy-mysql:ubuntu-6.0-latest
   profiles:
    - all
   ports:
@@ -213,7 +149,6 @@ services:
    - mysql-server
    - zabbix-java-gateway
    - zabbix-snmptraps
-   - zabbix-build-mysql
   networks:
    zbx_net_backend:
     aliases:
@@ -230,13 +165,7 @@ services:
    com.zabbix.os: "ubuntu"
 
  zabbix-web-apache-pgsql:
-  build:
-   context: ./Dockerfiles/web-apache-pgsql/ubuntu
-   cache_from:
-    - ubuntu:jammy
-   args:
-    BUILD_BASE_IMAGE: zabbix-build-pgsql:ubuntu-local
-  image: zabbix-web-apache-pgsql:ubuntu-local
+  image: zabbix/zabbix-web-apache-pgsql:ubuntu-6.0-latest
   profiles:
    - all
   ports:
@@ -266,7 +195,6 @@ services:
   depends_on:
    - postgres-server
    - zabbix-server
-   - zabbix-build-pgsql
   healthcheck:
    test: ["CMD", "curl", "-f", "http://localhost:8080/"]
    interval: 10s
@@ -292,13 +220,7 @@ services:
    com.zabbix.os: "ubuntu"
 
  zabbix-web-nginx-pgsql:
-  build:
-   context: ./Dockerfiles/web-nginx-pgsql/ubuntu
-   cache_from:
-    - ubuntu:jammy
-   args:
-    BUILD_BASE_IMAGE: zabbix-build-pgsql:ubuntu-local
-  image: zabbix-web-nginx-pgsql:ubuntu-local
+  image: zabbix/zabbix-web-nginx-pgsql:ubuntu-6.0-latest
   ports:
    - "80:8080"
    - "443:8443"
@@ -326,7 +248,6 @@ services:
   depends_on:
    - postgres-server
    - zabbix-server
-   - zabbix-build-pgsql
   healthcheck:
    test: ["CMD", "curl", "-f", "http://localhost:8080/"]
    interval: 10s
@@ -352,13 +273,7 @@ services:
    com.zabbix.os: "ubuntu"
 
  zabbix-agent:
-  build:
-   context: ./Dockerfiles/agent/ubuntu
-   cache_from:
-    - ubuntu:jammy
-   args:
-    BUILD_BASE_IMAGE: zabbix-build-pgsql:ubuntu-local
-  image: zabbix-agent:ubuntu-local
+  image: zabbix/zabbix-agent:ubuntu-6.0-latest
   profiles:
    - full
    - all
@@ -383,8 +298,6 @@ services:
    - ./env_vars/.env_agent
   privileged: true
   pid: "host"
-  depends_on:
-   - zabbix-build-pgsql
   networks:
    zbx_net_backend:
     aliases:
@@ -399,13 +312,7 @@ services:
    com.zabbix.os: "ubuntu"
 
  zabbix-java-gateway:
-  build:
-   context: ./Dockerfiles/java-gateway/ubuntu
-   cache_from:
-    - ubuntu:jammy
-   args:
-    BUILD_BASE_IMAGE: zabbix-build-pgsql:ubuntu-local
-  image: zabbix-java-gateway:ubuntu-local
+  image: zabbix/zabbix-java-gateway:ubuntu-6.0-latest
   profiles:
    - full
    - all
@@ -421,8 +328,6 @@ services:
       memory: 256M
   env_file:
    - ./env_vars/.env_java
-  depends_on:
-   - zabbix-build-pgsql
   networks:
    zbx_net_backend:
     aliases:
@@ -436,11 +341,7 @@ services:
    com.zabbix.os: "ubuntu"
 
  zabbix-snmptraps:
-  build:
-   context: ./Dockerfiles/snmptraps/ubuntu
-   cache_from:
-    - ubuntu:jammy
-  image: zabbix-snmptraps:ubuntu-local
+  image: zabbix/zabbix-snmptraps:ubuntu-6.0-latest
   profiles:
    - full
    - all
@@ -469,13 +370,7 @@ services:
    com.zabbix.os: "ubuntu"
 
  zabbix-web-service:
-  build:
-   context: ./Dockerfiles/web-service/ubuntu
-   cache_from:
-    - ubuntu:jammy
-   args:
-    BUILD_BASE_IMAGE: zabbix-build-pgsql:ubuntu-local
-  image: zabbix-web-service:ubuntu-local
+  image: zabbix/zabbix-web-service:ubuntu-6.0-latest
   profiles:
    - full
    - all
@@ -495,8 +390,6 @@ services:
       memory: 256M
   env_file:
    - ./env_vars/.env_web_service
-  depends_on:
-   - zabbix-build-pgsql
   networks:
    zbx_net_backend:
     aliases:
