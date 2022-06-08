@@ -1,0 +1,51 @@
+apiVersion: 2021-10-01
+location: eastus
+name: Zabbix_CTL
+properties:
+  containers:
+  - name: zabbix-web
+    properties:
+      image: zabbix/zabbix-web-nginx-pgsql:lastest
+      resources:
+        requests:
+          cpu: 1
+          memoryInGb: 1.5
+      ports:
+      - port: 443
+      - port: 8443
+  - name: zabbix-server
+    properties:
+      image: zabbix/zabbix-server-pgsql:latest
+      resources:
+        requests:
+          cpu: 1
+          memoryInGb: 1.5
+      ports:
+      - port: 10051
+      - port: 10051
+  - name: grafana
+    properties:
+      image: grafana/grafana:latest
+      resources:
+        requests:
+          cpu: 1
+          memoryInGb: 1.5
+  - name: postgresdb
+    properties:
+      image: postgres:latest
+      resources:
+        requests:
+          cpu: 1
+          memoryInGb: 1.5
+      volumeMounts: 
+      - name: pgpvc
+        mountPath: /mypv
+  osType: Linux
+  ipAddress:
+    type: Public
+    ports:
+    - protocol: tcp
+      port: 80
+    - protocol: tcp
+      port: 8080
+tags: {zabbix: testing}
